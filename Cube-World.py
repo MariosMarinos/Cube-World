@@ -1,11 +1,10 @@
 
 def OpenFile() :
     fname = input("Enter file name: ")
-    try:
-        fh = open(fname)
-    except Exception as e:
-        print ('Sorry your file cannot be opened ')
-        quit()
+    with open(fname) as fp:
+        for i, line in enumerate(fp):
+            if i >1: #2nd line
+                    
 
 
 if __name__ == "__main__" :
