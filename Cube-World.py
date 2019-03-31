@@ -2,9 +2,12 @@ from string import ascii_uppercase
 LETTERS = {letter: str(index) for index, letter in enumerate(ascii_uppercase, start=0)}
 
 
-class Node():
-    def __init__(self, list):
-        self.list = list()
+def findClearCubes(N, state):
+    AvailableCubes = list()
+    for i in range(0, N):
+        if i not in state:
+            AvailableCubes.append(i)
+    print(AvailableCubes)
 
 
 def OpenFile():
@@ -20,10 +23,10 @@ def OpenFile():
 def process_File():
     FileList = OpenFile()
     N = GetNumberOfCubes(FileList[0])
-    # removing the ( to
-    #  split it easier splitting with ) to get the positions of each cube
     GetInitState(N, FileList[1])
     GetGoalState(N, FileList[2])
+    # you need to combine the init state
+    #  in one line and goal state as well otherwise it won't WORK!
 
 
 def OnTableOn(list, state):
@@ -32,7 +35,7 @@ def OnTableOn(list, state):
             continue
         elif "ONTABLE" in element:
             temp = element.replace(' ', '').replace('ONTABLE', '')
-            #  removing whitespaces and ontable so i have only the cube left
+            # removing whitespaces and ontable so i have only the cube left
             tempnum = int(LETTERS.get(temp))  # converting string to init
             state[tempnum] = -1  # -1 for on table status
         elif "ON" in element:
@@ -60,7 +63,8 @@ def GetInitState(N, list):
     fixed2 = fixed.replace('(', '').split(')')
     start_state = [None] * N  # empty list for start_state
     print(OnTableOn(fixed2, start_state))
-
+    x = findClearCubes(N, start_state)
+    print(x)
 
 def GetGoalState(N, line):
     goal_state = [-1] * N
