@@ -7,7 +7,7 @@ def findClearCubes(N, state):
     for i in range(0, N):
         if i not in state:
             AvailableCubes.append(i)
-    print(AvailableCubes)
+    return AvailableCubes
 
 
 def OpenFile():
@@ -64,7 +64,7 @@ def GetInitState(N, list):
     start_state = [None] * N  # empty list for start_state
     print(OnTableOn(fixed2, start_state))
     x = findClearCubes(N, start_state)
-    print(x)
+    print (x)
 
 def GetGoalState(N, line):
     goal_state = [-1] * N
