@@ -16,16 +16,18 @@ def CheckIfSolution(state, final_state):
 
 def FindChildren(state):
     children = list()
-    copied_state = state.copy()
     ClearCubes = findClearCubes(len(state), state)
     print(ClearCubes)
     for index, pointer in enumerate(ClearCubes):
         print(index, pointer)
-        for item in ClearCubes:
-            
-
-
-
+        for i in range(len(ClearCubes)):
+            copied_state = state.copy()
+            if i != index:
+                copied_state[pointer] = ClearCubes[i]
+                print(copied_state)
+            elif state[pointer] != -1:
+                copied_state[pointer] = -1
+                print(copied_state)
 
 
 def BFS(init_state, final_state):
@@ -39,7 +41,6 @@ def BFS(init_state, final_state):
     if CheckIfSolution(currently_state, final_state):
         return 1
     children = FindChildren(currently_state)
-    print(currently_state)
 
 
 def findClearCubes(N, state):
