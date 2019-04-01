@@ -1,5 +1,45 @@
 from string import ascii_uppercase
+from collections import deque
 LETTERS = {letter: str(index) for index, letter in enumerate(ascii_uppercase, start=0)}
+
+
+class Node():
+    def __init__(self, state, parent):
+        self.state = state
+        self.parent = parent
+
+
+def CheckIfSolution(state, final_state):
+    if state == final_state:
+        return True
+
+
+def FindChildren(state):
+    children = list()
+    copied_state = state.copy()
+    ClearCubes = findClearCubes(len(state), state)
+    print(ClearCubes)
+    for index, pointer in enumerate(ClearCubes):
+        print(index, pointer)
+        for item in ClearCubes:
+            
+
+
+
+
+
+def BFS(init_state, final_state):
+    OldStates = {}
+    children = list()
+    Frontier = deque()
+    Frontier.append(init_state)
+    # while Frontier:
+    currently_state = Frontier.popleft()
+    # if (currently_state in OldStates):
+    if CheckIfSolution(currently_state, final_state):
+        return 1
+    children = FindChildren(currently_state)
+    print(currently_state)
 
 
 def findClearCubes(N, state):
@@ -23,10 +63,9 @@ def OpenFile():
 def process_File():
     FileList = OpenFile()
     N = GetNumberOfCubes(FileList[0])
-    GetInitState(N, FileList[1])
-    GetGoalState(N, FileList[2])
+    return N, GetInitState(N, FileList[1]), GetGoalState(N, FileList[2])
     # you need to combine the init state
-    #  in one line and goal state as well otherwise it won't WORK!
+    #  in one line and goal state otherwise it won't WORK!
 
 
 def OnTableOn(list, state):
@@ -62,17 +101,18 @@ def GetInitState(N, list):
     # of it to get only the positions of init state.
     fixed2 = fixed.replace('(', '').split(')')
     start_state = [None] * N  # empty list for start_state
-    print(OnTableOn(fixed2, start_state))
-    x = findClearCubes(N, start_state)
-    print(x)
+    OnTableOn(fixed2, start_state)
+    return start_state
 
 
 def GetGoalState(N, line):
     goal_state = [-1] * N
     fixed2 = line[13:].replace(')', '').split('(')
-    print(OnTableOn(fixed2, goal_state))
+    OnTableOn(fixed2, goal_state)
     return goal_state
 
 
 if __name__ == "__main__":
-    process_File()
+    N, init_state, goal_state = process_File()
+    print(init_state, goal_state)
+    BFS(init_state, goal_state)
