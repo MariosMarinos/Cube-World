@@ -5,42 +5,64 @@ LETTERS = {letter: str(index) for index, letter in enumerate(ascii_uppercase, st
 
 class Node():
     def __init__(self, state, parent):
-        self.state = state
-        self.parent = parent
+        self.state = state  # LIST
+        self.parent = parent  # Another object Node as parent
 
 
-def CheckIfSolution(state, final_state):
-    if state == final_state:
+def CheckIfSolution(current_node, goal_node):
+    if current_node == goal_node:
         return True
 
 
-def FindChildren(state):
+def PathToSolution(node, init_state):
+    tempNode = node
+    print(type(tempNode) is Node)
+    Moves = list()
+    while True:
+        Moves.append(tempNode.state)
+        if tempNode.state == init_state.state:
+            break
+        else:
+            tempNode = tempNode.parent
+
+    print('Moves', list(reversed(Moves)))
+
+
+
+def FindChildren(node):
     children = list()
-    ClearCubes = findClearCubes(len(state), state)
-    print(ClearCubes)
+    ClearCubes = findClearCubes(len(node.state), node.state)
     for index, pointer in enumerate(ClearCubes):
-        print(index, pointer)
         for i in range(len(ClearCubes)):
-            copied_state = state.copy()
+            copied_state = node.state.copy()
             if i != index:
                 copied_state[pointer] = ClearCubes[i]
-                print(copied_state)
-            elif state[pointer] != -1:
+                temp_node = Node(copied_state, node)
+                children.append(temp_node)
+            elif node.state[pointer] != -1:
                 copied_state[pointer] = -1
-                print(copied_state)
+                temp_node = Node(copied_state, node)
+                children.append(temp_node)
+    return children
 
 
 def BFS(init_state, final_state):
-    OldStates = {}
+    OldStates = list()
     children = list()
     Frontier = deque()
     Frontier.append(init_state)
-    # while Frontier:
-    currently_state = Frontier.popleft()
-    # if (currently_state in OldStates):
-    if CheckIfSolution(currently_state, final_state):
-        return 1
-    children = FindChildren(currently_state)
+    while Frontier:
+        currently_state = Frontier.pop()
+        if currently_state.state in OldStates:
+            continue
+        print(currently_state.state)
+        if CheckIfSolution(currently_state.state, final_state.state):
+            return PathToSolution(currently_state, init_state)
+        children = FindChildren(currently_state)
+        for item in children:
+            Frontier.appendleft(item)
+        OldStates.append(currently_state.parent)
+
 
 
 def findClearCubes(N, state):
@@ -103,17 +125,18 @@ def GetInitState(N, list):
     fixed2 = fixed.replace('(', '').split(')')
     start_state = [None] * N  # empty list for start_state
     OnTableOn(fixed2, start_state)
-    return start_state
+    root_node = Node(start_state, None)
+    return root_node
 
 
 def GetGoalState(N, line):
     goal_state = [-1] * N
     fixed2 = line[13:].replace(')', '').split('(')
     OnTableOn(fixed2, goal_state)
-    return goal_state
+    return Node(goal_state, None)
 
 
 if __name__ == "__main__":
     N, init_state, goal_state = process_File()
-    print(init_state, goal_state)
-    BFS(init_state, goal_state)
+    print('init state :', init_state.state, ' goal state :', goal_state.state)
+    Solution = BFS(init_state, goal_state)
