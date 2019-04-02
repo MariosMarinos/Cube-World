@@ -4,6 +4,7 @@ LETTERS = {letter: str(index) for index, letter in enumerate(ascii_uppercase, st
 
 
 class Node():
+
     def __init__(self, state, parent):
         self.state = state  # LIST
         self.parent = parent  # Another object Node as parent
@@ -11,12 +12,12 @@ class Node():
 
 def CheckIfSolution(current_node, goal_node):
     if current_node == goal_node:
+        print('SUCCESS')
         return True
 
 
 def PathToSolution(node, init_state):
     tempNode = node
-    print(type(tempNode) is Node)
     Moves = list()
     while True:
         Moves.append(tempNode.state)
@@ -24,9 +25,9 @@ def PathToSolution(node, init_state):
             break
         else:
             tempNode = tempNode.parent
+    tempList = list(reversed(Moves))
 
-    print('Moves', list(reversed(Moves)))
-
+    print('Moves needed were', len(tempList)-1, 'and are these :', tempList)
 
 
 def FindChildren(node):
@@ -55,14 +56,12 @@ def BFS(init_state, final_state):
         currently_state = Frontier.pop()
         if currently_state.state in OldStates:
             continue
-        print(currently_state.state)
         if CheckIfSolution(currently_state.state, final_state.state):
             return PathToSolution(currently_state, init_state)
         children = FindChildren(currently_state)
         for item in children:
             Frontier.appendleft(item)
         OldStates.append(currently_state.parent)
-
 
 
 def findClearCubes(N, state):
