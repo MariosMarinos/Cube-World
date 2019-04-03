@@ -1,5 +1,6 @@
 from string import ascii_uppercase
 from collections import deque
+import sys
 LETTERS = {letter: str(index) for index, letter in enumerate(ascii_uppercase, start=0)}
 
 
@@ -54,11 +55,11 @@ def PathToSolution(node, init_state):
         else:
             tempNode = tempNode.parent
     tempList = list(reversed(Moves))
-    print('Moves needed were', len(tempList)-1)
     for index, item in enumerate(tempList):
         if index == len(tempList) - 1:
             break
         convertListsToMoves(tempList[index], tempList[index+1])
+    return len(tempList) - 1
 
 
 def FindChildren(node):
@@ -111,18 +112,17 @@ def findClearCubes(N, state):
     return AvailableCubes
 
 
-def OpenFile():
+def OpenFile(fileName):
     File_list = list()
-    fname = input("Enter file name: ")
-    with open(fname) as fp:
+    with open(fileName) as fp:
         for i, line in enumerate(fp):
             if i > 1:
                 File_list.append(line)
     return File_list
 
 
-def process_File():
-    FileList = OpenFile()
+def process_File(FileName):
+    FileList = OpenFile(FileName)
     N = GetNumberOfCubes(FileList[0])
     return N, GetInitState(N, FileList[1]), GetGoalState(N, FileList[2])
     # you need to combine the init state
@@ -155,7 +155,7 @@ def GetNumberOfCubes(line):
     # leaving out the last and first element.
 
 
-#  defining the start_state of the problem.
+# defining the start_state of the problem.
 def GetInitState(N, list):
     x = list.replace('HANDEMPTY', '')
     fixed = x[7:len(x)-4]  # removing init,handempty and the parenthesis
@@ -167,6 +167,7 @@ def GetInitState(N, list):
     return root_node
 
 
+# definging the goal_state of the problem.
 def GetGoalState(N, line):
     goal_state = [-1] * N
     fixed2 = line[13:].replace(')', '').split('(')
@@ -175,7 +176,8 @@ def GetGoalState(N, line):
 
 
 if __name__ == "__main__":
-    N, init_state, goal_state = process_File()
+    N, init_state, goal_state = process_File(sys.argv[2])
     print('init state :', init_state.state, ' goal state :', goal_state.state)
-    Solution, NodesTested = search('BFS', init_state, goal_state)
+    MovesMade, NodesTested = search(sys.argv[1], init_state, goal_state)
     print('Nodes Tested were :', NodesTested)
+    print('Moves were made :', MovesMade)
