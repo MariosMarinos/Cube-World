@@ -51,7 +51,7 @@ def FindChildren(node):
     return children
 
 
-def BFS(init_state, final_state):
+def search(Algorithm, init_state, final_state):
     OldStates = list()
     children = list()
     Frontier = deque()
@@ -65,30 +65,13 @@ def BFS(init_state, final_state):
             print(i)
             return PathToSolution(currently_state, init_state)
         children = FindChildren(currently_state)
-        for item in children:
-            Frontier.appendleft(item)
-        if currently_state.state not in OldStates:
-            OldStates.append(currently_state.state)
-        i = i + 1
-
-
-def DFS(init_state, final_state):
-    OldStates = list()
-    children = list()
-    Frontier = deque()
-    Frontier.append(init_state)
-    i = 0
-    while Frontier:
-        currently_state = Frontier.pop()
-        if currently_state.state in OldStates:
-            continue
-        if CheckIfSolution(currently_state.state, final_state.state):
-            print(i)
-            return PathToSolution(currently_state, init_state)
-        children = FindChildren(currently_state)
-        tempchild = list(reversed(children))
-        for item in tempchild:
-            Frontier.append(item)
+        if Algorithm == 'BFS':
+            for item in children:
+                Frontier.appendleft(item)
+        elif Algorithm == 'DFS':
+            tempchild = list(reversed(children))
+            for item in tempchild:
+                Frontier.append(item)
         if currently_state.state not in OldStates:
             OldStates.append(currently_state.state)
         i = i + 1
@@ -167,5 +150,5 @@ def GetGoalState(N, line):
 
 if __name__ == "__main__":
     N, init_state, goal_state = process_File()
-    Solution = BFS(init_state, goal_state)
+    Solution = search('DFS', init_state, goal_state)
     print('init state :', init_state.state, ' goal state :', goal_state.state)
