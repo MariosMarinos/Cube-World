@@ -16,6 +16,34 @@ def CheckIfSolution(current_node, goal_node):
         return True
 
 
+def convertValueToKey(index):
+    return list(LETTERS.keys())[list(LETTERS.values()).index(str(index))]
+    pass
+
+
+def convertListsToMoves(list1, list2):
+    i = 0
+    index = -1  # index of the changing element
+    while i < len(list1):
+        if list1[i] != list2[i]:
+            index = i
+            break
+        i += 1
+    temp = convertValueToKey(index)
+    if list1[index] == -1:
+        temp1 = 'table'
+    else:
+        tempnum = list1[index]  # helping variable
+        temp1 = convertValueToKey(tempnum)
+        pass
+    if list2[index] == -1:
+        temp2 = 'table'
+    else:
+        tempnum = list2[index]  # helping variable
+        temp2 = convertValueToKey(tempnum)
+    print('Move(', temp, ',', temp1, ',', temp2, ')')
+
+
 def PathToSolution(node, init_state):
     tempNode = node
     Moves = list()
@@ -26,7 +54,11 @@ def PathToSolution(node, init_state):
         else:
             tempNode = tempNode.parent
     tempList = list(reversed(Moves))
-    print('Moves needed were', len(tempList)-1, 'and are these :', tempList)
+    print('Moves needed were', len(tempList)-1)
+    for index, item in enumerate(tempList):
+        if index == len(tempList) - 1:
+            break
+        convertListsToMoves(tempList[index], tempList[index+1])
 
 
 def FindChildren(node):
@@ -43,11 +75,6 @@ def FindChildren(node):
                 copied_state[pointer] = -1
                 temp_node = Node(copied_state, node)
                 children.append(temp_node)
-    """
-    print('expanded')
-    for item in children:
-        print(item.state)
-    """
     return children
 
 
@@ -61,9 +88,9 @@ def search(Algorithm, init_state, final_state):
         currently_state = Frontier.pop()
         if currently_state.state in OldStates:
             continue
+        i += 1
         if CheckIfSolution(currently_state.state, final_state.state):
-            print(i)
-            return PathToSolution(currently_state, init_state)
+            return PathToSolution(currently_state, init_state), i
         children = FindChildren(currently_state)
         if Algorithm == 'BFS':
             for item in children:
@@ -74,7 +101,6 @@ def search(Algorithm, init_state, final_state):
                 Frontier.append(item)
         if currently_state.state not in OldStates:
             OldStates.append(currently_state.state)
-        i = i + 1
 
 
 def findClearCubes(N, state):
@@ -150,5 +176,6 @@ def GetGoalState(N, line):
 
 if __name__ == "__main__":
     N, init_state, goal_state = process_File()
-    Solution = search('DFS', init_state, goal_state)
     print('init state :', init_state.state, ' goal state :', goal_state.state)
+    Solution, NodesTested = search('BFS', init_state, goal_state)
+    print('Nodes Tested were :', NodesTested)
