@@ -6,9 +6,11 @@ LETTERS = {letter: str(index) for index, letter in enumerate(ascii_uppercase, st
 
 class Node():
 
-    def __init__(self, state, parent):
+    def __init__(self, state, parent, h, g):
         self.state = state  # LIST
         self.parent = parent  # Another object Node as parent
+        self.h = h  # heuristic value for this Node
+        self.g = g  # the depth of this node
 
 
 def CheckIfSolution(current_node, goal_node):
@@ -62,6 +64,10 @@ def PathToSolution(node, init_state):
     return len(tempList) - 1
 
 
+def getHeuristic():
+    pass
+
+
 def FindChildren(node):
     children = list()
     ClearCubes = findClearCubes(len(node.state), node.state)
@@ -70,11 +76,11 @@ def FindChildren(node):
             copied_state = node.state.copy()
             if i != index:
                 copied_state[pointer] = ClearCubes[i]
-                temp_node = Node(copied_state, node)
+                temp_node = Node(copied_state, node, getHeuristic(), node.g+1)
                 children.append(temp_node)
             elif node.state[pointer] != -1:
                 copied_state[pointer] = -1
-                temp_node = Node(copied_state, node)
+                temp_node = Node(copied_state, node, getHeuristic(), node.g+1)
                 children.append(temp_node)
     return children
 
@@ -89,6 +95,7 @@ def search(Algorithm, init_state, final_state):
         currently_state = Frontier.pop()
         if currently_state.state in OldStates:
             continue
+        print('currently_state : ', currently_state.state, 'and depth is :', currently_state.g)
         i += 1
         if CheckIfSolution(currently_state.state, final_state.state):
             return PathToSolution(currently_state, init_state), i
@@ -100,6 +107,7 @@ def search(Algorithm, init_state, final_state):
             tempchild = list(reversed(children))
             for item in tempchild:
                 Frontier.append(item)
+        # print('Frontier contains', len(Frontier), ' elements')
         if currently_state.state not in OldStates:
             OldStates.append(currently_state.state)
 
@@ -163,7 +171,7 @@ def GetInitState(N, list):
     fixed2 = fixed.replace('(', '').split(')')
     start_state = [None] * N  # empty list for start_state
     OnTableOn(fixed2, start_state)
-    root_node = Node(start_state, None)
+    root_node = Node(start_state, None, 0, 0)
     return root_node
 
 
@@ -172,7 +180,7 @@ def GetGoalState(N, line):
     goal_state = [-1] * N
     fixed2 = line[13:].replace(')', '').split('(')
     OnTableOn(fixed2, goal_state)
-    return Node(goal_state, None)
+    return Node(goal_state, None, 0, 0)
 
 
 if __name__ == "__main__":
