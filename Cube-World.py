@@ -77,11 +77,19 @@ def FindChildren(node):
             if i != index:
                 copied_state[pointer] = ClearCubes[i]
                 temp_node = Node(copied_state, node, getHeuristic(), node.g+1)
-                children.append(temp_node)
+                if node.parent is not None:
+                    if temp_node.state != node.parent.state:
+                        children.append(temp_node)
+                else:
+                    children.append(temp_node)
             elif node.state[pointer] != -1:
                 copied_state[pointer] = -1
                 temp_node = Node(copied_state, node, getHeuristic(), node.g+1)
-                children.append(temp_node)
+                if node.parent is not None:
+                    if temp_node.state != node.parent.state:
+                        children.append(temp_node)
+                else:
+                    children.append(temp_node)
     return children
 
 
@@ -107,7 +115,6 @@ def search(Algorithm, init_state, final_state):
             tempchild = list(reversed(children))
             for item in tempchild:
                 Frontier.append(item)
-        # print('Frontier contains', len(Frontier), ' elements')
         if currently_state.state not in OldStates:
             OldStates.append(currently_state.state)
 
