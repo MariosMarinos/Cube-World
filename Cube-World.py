@@ -3,7 +3,7 @@ from collections import deque
 import sys
 import time
 LETTERS = {letter: str(index) for index, letter in enumerate(ascii_uppercase, start=0)}
-PERIOD_OF_TIME = 600 # after 10 mins the program stops.
+PERIOD_OF_TIME = 600  # after 10 mins the program stops.
 
 
 class Node():
@@ -70,7 +70,7 @@ def getHeuristic():
     pass
 
 
-def FindChildren(node):
+def FindChildren(node, OldStates):
     children = list()
     ClearCubes = findClearCubes(len(node.state), node.state)
     for index, pointer in enumerate(ClearCubes):
@@ -78,6 +78,8 @@ def FindChildren(node):
             copied_state = node.state.copy()
             if i != index:
                 copied_state[pointer] = ClearCubes[i]
+                if tuple(copied_state) in OldStates:
+                    continue
                 temp_node = Node(copied_state, node, getHeuristic(), node.g+1)
                 if node.parent is not None:
                     if temp_node.state != node.parent.state:
@@ -86,22 +88,24 @@ def FindChildren(node):
                     children.append(temp_node)
             elif node.state[pointer] != -1:
                 copied_state[pointer] = -1
+                if tuple(copied_state) in OldStates:
+                    continue
                 temp_node = Node(copied_state, node, getHeuristic(), node.g+1)
                 if node.parent is not None:
                     if temp_node.state != node.parent.state:
                         children.append(temp_node)
                 else:
                     children.append(temp_node)
-    return children
+    return children, len(children)
 
 
 def search(Algorithm, init_state, final_state):
     start = time.time()
     OldStates = set()
     children = list()
+    length = 0
     Frontier = deque()
     Frontier.append(init_state)
-    #Frontier = deque(dict.fromkeys(Frontier))
     i = 0
     while Frontier:
         if (time.time() > start + PERIOD_OF_TIME):
@@ -111,8 +115,10 @@ def search(Algorithm, init_state, final_state):
             continue
         i += 1
         if CheckIfSolution(currently_state.state, final_state.state):
+            print("childrens :", length)
             return PathToSolution(currently_state, init_state), i
-        children = FindChildren(currently_state)
+        children, len = FindChildren(currently_state, OldStates)
+        length = length + len
         if Algorithm == 'BFS':
             for item in children:
                 Frontier.appendleft(item)
@@ -120,7 +126,6 @@ def search(Algorithm, init_state, final_state):
             tempchild = list(reversed(children))
             for item in tempchild:
                 Frontier.append(item)
-        print(len(Frontier))
         OldStates.add(tuple(currently_state.state))
 
 
