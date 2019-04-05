@@ -1,7 +1,9 @@
 from string import ascii_uppercase
 from collections import deque
 import sys
+import time
 LETTERS = {letter: str(index) for index, letter in enumerate(ascii_uppercase, start=0)}
+PERIOD_OF_TIME = 600 # after 10 mins the program stops.
 
 
 class Node():
@@ -94,16 +96,19 @@ def FindChildren(node):
 
 
 def search(Algorithm, init_state, final_state):
-    OldStates = list()
+    start = time.time()
+    OldStates = set()
     children = list()
     Frontier = deque()
     Frontier.append(init_state)
+    #Frontier = deque(dict.fromkeys(Frontier))
     i = 0
     while Frontier:
+        if (time.time() > start + PERIOD_OF_TIME):
+            return 0, 0
         currently_state = Frontier.pop()
-        if currently_state.state in OldStates:
+        if tuple(currently_state.state) in OldStates:
             continue
-        print('currently_state : ', currently_state.state, 'and depth is :', currently_state.g)
         i += 1
         if CheckIfSolution(currently_state.state, final_state.state):
             return PathToSolution(currently_state, init_state), i
@@ -115,8 +120,8 @@ def search(Algorithm, init_state, final_state):
             tempchild = list(reversed(children))
             for item in tempchild:
                 Frontier.append(item)
-        if currently_state.state not in OldStates:
-            OldStates.append(currently_state.state)
+        print(len(Frontier))
+        OldStates.add(tuple(currently_state.state))
 
 
 def findClearCubes(N, state):
