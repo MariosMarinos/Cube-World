@@ -96,7 +96,7 @@ def FindChildren(node, OldStates):
                         children.append(temp_node)
                 else:
                     children.append(temp_node)
-    return children, len(children)
+    return children
 
 
 def search(Algorithm, init_state, final_state):
@@ -116,9 +116,10 @@ def search(Algorithm, init_state, final_state):
         i += 1
         if CheckIfSolution(currently_state.state, final_state.state):
             print("childrens :", length)
+            print(len(Frontier))
             return PathToSolution(currently_state, init_state), i
-        children, len = FindChildren(currently_state, OldStates)
-        length = length + len
+        children = FindChildren(currently_state, OldStates)
+        length = length + len(children)
         if Algorithm == 'BFS':
             for item in children:
                 Frontier.appendleft(item)
