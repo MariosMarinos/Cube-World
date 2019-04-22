@@ -2,6 +2,7 @@ from string import ascii_uppercase
 from collections import deque
 import sys
 import time
+import itertools
 LETTERS = {letter: str(index) for index, letter in enumerate(ascii_uppercase, start=0)}
 PERIOD_OF_TIME = 600  # after 10 mins the program stops.
 
@@ -73,29 +74,28 @@ def getHeuristic():
 def FindChildren(node, OldStates):
     children = list()
     ClearCubes = findClearCubes(len(node.state), node.state)
-    for index, pointer in enumerate(ClearCubes):
-        for i in range(len(ClearCubes)):
-            copied_state = node.state.copy()
-            if i != index:
-                copied_state[pointer] = ClearCubes[i]
-                if tuple(copied_state) in OldStates:
-                    continue
-                temp_node = Node(copied_state, node, getHeuristic(), node.g+1)
-                if node.parent is not None:
-                    if temp_node.state != node.parent.state:
-                        children.append(temp_node)
-                else:
+    for (index, pointer), i in itertools.product(enumerate(ClearCubes), range(len(ClearCubes))):
+        copied_state = node.state.copy()
+        if i != index:
+            copied_state[pointer] = ClearCubes[i]
+            if tuple(copied_state) in OldStates:
+                continue
+            temp_node = Node(copied_state, node, getHeuristic(), node.g+1)
+            if node.parent is not None:
+                if temp_node.state != node.parent.state:
                     children.append(temp_node)
-            elif node.state[pointer] != -1:
-                copied_state[pointer] = -1
-                if tuple(copied_state) in OldStates:
-                    continue
-                temp_node = Node(copied_state, node, getHeuristic(), node.g+1)
-                if node.parent is not None:
-                    if temp_node.state != node.parent.state:
-                        children.append(temp_node)
-                else:
+            else:
+                children.append(temp_node)
+        elif node.state[pointer] != -1:
+            copied_state[pointer] = -1
+            if tuple(copied_state) in OldStates:
+                continue
+            temp_node = Node(copied_state, node, getHeuristic(), node.g+1)
+            if node.parent is not None:
+                if temp_node.state != node.parent.state:
                     children.append(temp_node)
+            else:
+                children.append(temp_node)
     return children
 
 
@@ -127,6 +127,7 @@ def search(Algorithm, init_state, final_state):
             tempchild = list(reversed(children))
             for item in tempchild:
                 Frontier.append(item)
+        print(len(Frontier))
         OldStates.add(tuple(currently_state.state))
 
 
