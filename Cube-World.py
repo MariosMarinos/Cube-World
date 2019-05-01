@@ -109,7 +109,7 @@ def search(Algorithm, init_state, final_state):
     i = 0
     while Frontier:
         if (time.time() > start + PERIOD_OF_TIME):
-            return 0, 0
+            return 0, 0, 0
         currently_state = Frontier.pop()
         if tuple(currently_state.state) in OldStates:
             continue
@@ -117,7 +117,7 @@ def search(Algorithm, init_state, final_state):
         if CheckIfSolution(currently_state.state, final_state.state):
             print("childrens :", length)
             print(len(Frontier))
-            return PathToSolution(currently_state, init_state), i
+            return PathToSolution(currently_state, init_state), i, time.time()-start
         children = FindChildren(currently_state, OldStates)
         length = length + len(children)
         if Algorithm == 'BFS':
@@ -205,6 +205,7 @@ def GetGoalState(N, line):
 if __name__ == "__main__":
     N, init_state, goal_state = process_File(sys.argv[2])
     print('init state :', init_state.state, ' goal state :', goal_state.state)
-    MovesMade, NodesTested = search(sys.argv[1], init_state, goal_state)
+    MovesMade, NodesTested, Time = search(sys.argv[1], init_state, goal_state)
     print('Nodes Tested were :', NodesTested)
     print('Moves were made :', MovesMade)
+    print('Time needed was :', Time, 'seconds.')
