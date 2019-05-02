@@ -17,19 +17,24 @@ class Node():
         self.g = g  # the depth of this node
 
     def getHeuristic(self, goal_state):
+        # iterating the state of current node.
         for index, pointer in enumerate(self.state):
             flag = False
-            print(index, pointer)
+            # if the current cube is on top of the right cube add 0 otherwise add 1.
             if pointer == goal_state[index]:
                 self.h += 0
-                continue
+            else:
+                self.h += 1
+            # if the current cube is under of the right cube add 0 otherwise add 1.
             for i in goal_state.state:
-                if self.state[i] == index:
-                    if self.state[i] == goal_state.state[i]:
-                        self.h += 0
-                        flag = True
+                # finding the cube which the current cube must be under of.
+                # first condition is to find who is under the current cube
+                # whereas second is to find who must be under of.
+                if self.state[i] == index and self.state[i] == goal_state.state[i]:
+                    self.h += 0
+                    flag = True
             if not flag:
-                self.h += 2
+                self.h += 1
 
     def __getitem__(self, key):
         return self.state[key]
@@ -117,6 +122,7 @@ def FindChildren(node, OldStates, Algorithm, final_state):
                 temp_node = Node(copied_state, node, 0, node.g+1)
             else:
                 temp_node = Node(copied_state, node, 0, node.g+1)
+                temp_node.getHeuristic(final_state)
             # if the kid has parent and is not the same as the parent append it.
             if node.parent is not None:
                 if temp_node.state != node.parent.state:
@@ -132,6 +138,7 @@ def FindChildren(node, OldStates, Algorithm, final_state):
                 temp_node = Node(copied_state, node, 0, node.g+1)
             else:
                 temp_node = Node(copied_state, node, 0, node.g+1)
+                temp_node.getHeuristic(final_state)
             if node.parent is not None:
                 if temp_node.state != node.parent.state:
                     children.append(temp_node)
@@ -170,7 +177,6 @@ def search(Algorithm, init_state, final_state):
             tempchild = list((children))
             for item in tempchild:
                 Frontier.append(item)
-        print(len(Frontier))
         OldStates.add(tuple(currently_state.state))
 
 
@@ -181,26 +187,27 @@ def search_heuristic(Algorithm, init_state, final_state):
     length = 0
     Frontier = list()  # Frontier
     heapq.heapify(Frontier)
-    heapq.heappush(Frontier, init_state)   # Frontier Append the init state.
+    heapq.heappush(Frontier, (init_state.h, init_state))   # Frontier Append the init state.
     i = 0  # How many iterations were need(Nodes tested)
     while Frontier:
         if (time.time() > start + PERIOD_OF_TIME):
             return 0, 0, 0  # if the given time expires stop the program.
-        currently_state = heapq.heappop(Frontier)  # popping currently state on deque.
-        if tuple(currently_state.state) in OldStates:
+        currently_state = heapq.heappop(Frontier)  # popping currently state on heap.
+        if tuple(currently_state[1].state) in OldStates:
             # converting the list state into tuple to have it in set.
             continue
         i += 1  # increase the iterations if the node is going to be tested.
-        if CheckIfSolution(currently_state.state, final_state.state):
+        if CheckIfSolution(currently_state[1].state, final_state.state):
             # if it is solution stop and return the path, iterations, and time needed
             print("childrens :", length)
             print(len(Frontier))
-            return PathToSolution(currently_state, init_state), i, time.time()-start
-        children = FindChildren(currently_state, OldStates, Algorithm, final_state)  # find the children.
+            return PathToSolution(currently_state[1].state, init_state), i, time.time()-start
+        children = FindChildren(currently_state[1], OldStates, Algorithm, final_state)  # find the children.
         length = length + len(children)
         if Algorithm == 'BFS':
             for item in children:
-                heapq.heappush(Frontier, item)
+                heapq.heappush(Frontier, (item.h, item))
+        OldStates.add(tuple(currently_state[1].state))
     pass
 
 
@@ -281,8 +288,7 @@ if __name__ == "__main__":
     N, init_state, goal_state = process_File(sys.argv[2])
     print('init state :', init_state.state, ' goal state :', goal_state.state)
     init_state.getHeuristic(goal_state)
-    print('heuristic value:', init_state.h)
-    #MovesMade, NodesTested, Time = search(sys.argv[1], init_state, goal_state)
-    #print('Nodes Tested were :', NodesTested)
-    #print('Moves were made :', MovesMade)
-    #print('Time needed was :', Time, 'seconds.')
+    MovesMade, NodesTested, Time = search_heuristic(sys.argv[1], init_state, goal_state)
+    print('Nodes Tested were :', NodesTested)
+    print('Moves were made :', MovesMade)
+    print('Time needed was :', Time, 'seconds.')
