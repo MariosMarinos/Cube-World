@@ -16,6 +16,24 @@ class Node():
         self.h = h  # heuristic value for this Node
         self.g = g  # the depth of this node
 
+    def getHeuristic(self, goal_state):
+        for index, pointer in enumerate(self.state):
+            flag = False
+            print(index, pointer)
+            if pointer == goal_state[index]:
+                self.h += 0
+                continue
+            for i in goal_state.state:
+                if self.state[i] == index:
+                    if self.state[i] == goal_state.state[i]:
+                        self.h += 0
+                        flag = True
+            if not flag:
+                self.h += 2
+
+    def __getitem__(self, key):
+        return self.state[key]
+
 
 def CheckIfSolution(current_node, goal_node):
     if current_node == goal_node:
@@ -80,11 +98,7 @@ def PathToSolution(node, init_state):
     return len(tempList) - 1
 
 
-def getHeuristic():
-    pass
-
-
-def FindChildren(node, OldStates):
+def FindChildren(node, OldStates, Algorithm, final_state):
     children = list()  # empty list for the children
     ClearCubes = findClearCubes(len(node.state), node.state)  # find the clear cubes.
     # for index, pointer in enumerate(ClearCubes):
@@ -99,7 +113,10 @@ def FindChildren(node, OldStates):
                 # if state is already used dont make the child.
                 continue
             # creating the kid.
-            temp_node = Node(copied_state, node, getHeuristic(), node.g+1)
+            if Algorithm == 'un-informed':
+                temp_node = Node(copied_state, node, 0, node.g+1)
+            else:
+                temp_node = Node(copied_state, node, 0, node.g+1)
             # if the kid has parent and is not the same as the parent append it.
             if node.parent is not None:
                 if temp_node.state != node.parent.state:
@@ -111,7 +128,10 @@ def FindChildren(node, OldStates):
             # the else are  same as before.
             if tuple(copied_state) in OldStates:
                 continue
-            temp_node = Node(copied_state, node, getHeuristic(), node.g+1)
+            if Algorithm == 'un-informed':
+                temp_node = Node(copied_state, node, 0, node.g+1)
+            else:
+                temp_node = Node(copied_state, node, 0, node.g+1)
             if node.parent is not None:
                 if temp_node.state != node.parent.state:
                     children.append(temp_node)
@@ -141,7 +161,7 @@ def search(Algorithm, init_state, final_state):
             print("childrens :", length)
             print(len(Frontier))
             return PathToSolution(currently_state, init_state), i, time.time()-start
-        children = FindChildren(currently_state, OldStates)  # find the children.
+        children = FindChildren(currently_state, OldStates, Algorithm, final_state)  # find the children.
         length = length + len(children)
         if Algorithm == 'BFS':  # if BFS append from left in Frontier.
             for item in children:
@@ -176,7 +196,7 @@ def search_heuristic(Algorithm, init_state, final_state):
             print("childrens :", length)
             print(len(Frontier))
             return PathToSolution(currently_state, init_state), i, time.time()-start
-        children = FindChildren(currently_state, OldStates)  # find the children.
+        children = FindChildren(currently_state, OldStates, Algorithm, final_state)  # find the children.
         length = length + len(children)
         if Algorithm == 'BFS':
             for item in children:
@@ -260,7 +280,9 @@ def GetGoalState(N, line):
 if __name__ == "__main__":
     N, init_state, goal_state = process_File(sys.argv[2])
     print('init state :', init_state.state, ' goal state :', goal_state.state)
-    MovesMade, NodesTested, Time = search(sys.argv[1], init_state, goal_state)
-    print('Nodes Tested were :', NodesTested)
-    print('Moves were made :', MovesMade)
-    print('Time needed was :', Time, 'seconds.')
+    init_state.getHeuristic(goal_state)
+    print('heuristic value:', init_state.h)
+    #MovesMade, NodesTested, Time = search(sys.argv[1], init_state, goal_state)
+    #print('Nodes Tested were :', NodesTested)
+    #print('Moves were made :', MovesMade)
+    #print('Time needed was :', Time, 'seconds.')
