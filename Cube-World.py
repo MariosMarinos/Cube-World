@@ -21,9 +21,7 @@ class Node():
         for index, pointer in enumerate(self.state):
             flag = False
             # if the current cube is on top of the right cube add 0 otherwise add 1.
-            if pointer == goal_state[index]:
-                self.h += 0
-            else:
+            if pointer != goal_state[index]:
                 self.h += 1
             # if the current cube is under of the right cube add 0 otherwise add 1.
             for i in goal_state.state:
@@ -32,7 +30,7 @@ class Node():
                 # whereas second is to find who must be under of.
                 if self.state[i] == index and self.state[i] == goal_state.state[i]:
                     flag = True
-            if not (flag):
+            if not flag:
                 self.h += 1
 
     def __getitem__(self, key):
@@ -44,7 +42,6 @@ class Node():
     def getHeuristicAstar(self, goal_state):
         self.getHeuristic(goal_state)
         self.h += self.g
-        print(self.h)
 
 
 def CheckIfSolution(current_node, goal_node):
