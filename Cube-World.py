@@ -31,13 +31,20 @@ class Node():
                 # first condition is to find who is under the current cube
                 # whereas second is to find who must be under of.
                 if self.state[i] == index and self.state[i] == goal_state.state[i]:
-                    self.h += 0
                     flag = True
-            if not flag:
+            if not (flag):
                 self.h += 1
 
     def __getitem__(self, key):
         return self.state[key]
+
+    def __lt__(self, other):
+        return self.h < other.h
+
+    def getHeuristicAstar(self, goal_state):
+        self.getHeuristic(goal_state)
+        self.h += self.g
+        print(self.h)
 
 
 def CheckIfSolution(current_node, goal_node):
@@ -103,7 +110,7 @@ def PathToSolution(node, init_state):
     return len(tempList) - 1
 
 
-def FindChildren(node, OldStates, Algorithm, final_state):
+def FindChildren(node, OldStates):
     children = list()  # empty list for the children
     ClearCubes = findClearCubes(len(node.state), node.state)  # find the clear cubes.
     # for index, pointer in enumerate(ClearCubes):
@@ -118,11 +125,7 @@ def FindChildren(node, OldStates, Algorithm, final_state):
                 # if state is already used dont make the child.
                 continue
             # creating the kid.
-            if Algorithm == 'un-informed':
-                temp_node = Node(copied_state, node, 0, node.g+1)
-            else:
-                temp_node = Node(copied_state, node, 0, node.g+1)
-                temp_node.getHeuristic(final_state)
+            temp_node = Node(copied_state, node, 0, node.g+1)
             # if the kid has parent and is not the same as the parent append it.
             if node.parent is not None:
                 if temp_node.state != node.parent.state:
@@ -134,11 +137,7 @@ def FindChildren(node, OldStates, Algorithm, final_state):
             # the else are  same as before.
             if tuple(copied_state) in OldStates:
                 continue
-            if Algorithm == 'un-informed':
-                temp_node = Node(copied_state, node, 0, node.g+1)
-            else:
-                temp_node = Node(copied_state, node, 0, node.g+1)
-                temp_node.getHeuristic(final_state)
+            temp_node = Node(copied_state, node, 0, node.g+1)
             if node.parent is not None:
                 if temp_node.state != node.parent.state:
                     children.append(temp_node)
@@ -168,7 +167,7 @@ def search(Algorithm, init_state, final_state):
             print("childrens :", length)
             print(len(Frontier))
             return PathToSolution(currently_state, init_state), i, time.time()-start
-        children = FindChildren(currently_state, OldStates, Algorithm, final_state)  # find the children.
+        children = FindChildren(currently_state, OldStates)  # find the children.
         length = length + len(children)
         if Algorithm == 'BFS':  # if BFS append from left in Frontier.
             for item in children:
@@ -187,27 +186,32 @@ def search_heuristic(Algorithm, init_state, final_state):
     length = 0
     Frontier = list()  # Frontier
     heapq.heapify(Frontier)
-    heapq.heappush(Frontier, (init_state.h, init_state))   # Frontier Append the init state.
+    heapq.heappush(Frontier, init_state)  # Frontier Append the init state.
     i = 0  # How many iterations were need(Nodes tested)
     while Frontier:
         if (time.time() > start + PERIOD_OF_TIME):
             return 0, 0, 0  # if the given time expires stop the program.
         currently_state = heapq.heappop(Frontier)  # popping currently state on heap.
-        if tuple(currently_state[1].state) in OldStates:
+        if tuple(currently_state.state) in OldStates:
             # converting the list state into tuple to have it in set.
             continue
         i += 1  # increase the iterations if the node is going to be tested.
-        if CheckIfSolution(currently_state[1].state, final_state.state):
+        if CheckIfSolution(currently_state.state, final_state.state):
             # if it is solution stop and return the path, iterations, and time needed
             print("childrens :", length)
-            print(len(Frontier))
-            return PathToSolution(currently_state[1].state, init_state), i, time.time()-start
-        children = FindChildren(currently_state[1], OldStates, Algorithm, final_state)  # find the children.
+            # print(len(Frontier))
+            return PathToSolution(currently_state, init_state), i, time.time()-start
+        children = FindChildren(currently_state, OldStates)  # find the children.
         length = length + len(children)
         if Algorithm == 'BFS':
             for item in children:
-                heapq.heappush(Frontier, (item.h, item))
-        OldStates.add(tuple(currently_state[1].state))
+                item.getHeuristic(final_state)
+                heapq.heappush(Frontier, item)
+        elif Algorithm == 'A*':
+            for item in children:
+                item.getHeuristicAstar(final_state)
+                heapq.heappush(Frontier, item)
+        OldStates.add(tuple(currently_state.state))
     pass
 
 
