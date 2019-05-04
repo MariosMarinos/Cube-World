@@ -139,8 +139,8 @@ def FindChildren(node, OldStates):
         elif node.state[pointer] != -1:  # if it's not on the table it can go on the table.
             copied_state[pointer] = -1
             # the else are  same as before.
-            #if tuple(copied_state) in OldStates:
-                #continue
+            if tuple(copied_state) in OldStates:
+                continue
             temp_node = Node(copied_state, node, 0, node.g+1)
             if node.parent is not None:
                 if temp_node.state != node.parent.state:
@@ -195,7 +195,6 @@ def search_heuristic(Algorithm, init_state, final_state):
         if (time.time() > start + PERIOD_OF_TIME):
             return 0, 0, 0  # if the given time expires stop the program.
         currently_state = heapq.heappop(Frontier)  # popping currently state on heap.
-        # print(currently_state.state, currently_state.h)
         if tuple(currently_state.state) in OldStates:
             # converting the list state into tuple to have it in set.
             continue
