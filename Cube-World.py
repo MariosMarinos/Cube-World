@@ -24,13 +24,16 @@ class Node():
             if pointer != goal_state[index]:
                 self.h += 1
             # if the current cube is under of the right cube add 0 otherwise add 1.
-            for i in goal_state.state:
+            for i in range(len(goal_state.state)):
                 # finding the cube which the current cube must be under of.
                 # first condition is to find who is under the current cube
                 # whereas second is to find who must be under of.
-                if self.state[i] == index and self.state[i] == goal_state.state[i]:
-                    flag = True
-            if not flag:
+                if self.state[i] == index:
+                    if self.state[i] == goal_state.state[i]:
+                        flag = True
+            if flag:
+                pass
+            else:
                 self.h += 1
 
     def __getitem__(self, key):
@@ -38,6 +41,9 @@ class Node():
 
     def __lt__(self, other):
         return self.h < other.h
+
+    def __eq__(self, other):
+        return self.h == other.h and self.state == other.state
 
     def getHeuristicAstar(self, goal_state):
         self.getHeuristic(goal_state)
@@ -128,12 +134,13 @@ def FindChildren(node, OldStates):
                 if temp_node.state != node.parent.state:
                     children.append(temp_node)
             else:
-                children.append(temp_node)  # is just for the first state.
+                children.append(temp_node)
+              # is just for the first state.
         elif node.state[pointer] != -1:  # if it's not on the table it can go on the table.
             copied_state[pointer] = -1
             # the else are  same as before.
-            if tuple(copied_state) in OldStates:
-                continue
+            #if tuple(copied_state) in OldStates:
+                #continue
             temp_node = Node(copied_state, node, 0, node.g+1)
             if node.parent is not None:
                 if temp_node.state != node.parent.state:
@@ -184,20 +191,20 @@ def search_heuristic(Algorithm, init_state, final_state):
     Frontier = list()  # Frontier
     heapq.heapify(Frontier)
     heapq.heappush(Frontier, init_state)  # Frontier Append the init state.
-    i = 0  # How many iterations were need(Nodes tested)
     while Frontier:
         if (time.time() > start + PERIOD_OF_TIME):
             return 0, 0, 0  # if the given time expires stop the program.
         currently_state = heapq.heappop(Frontier)  # popping currently state on heap.
+        # print(currently_state.state, currently_state.h)
         if tuple(currently_state.state) in OldStates:
             # converting the list state into tuple to have it in set.
             continue
-        i += 1  # increase the iterations if the node is going to be tested.
+        #print(currently_state.state, currently_state.h)
         if CheckIfSolution(currently_state.state, final_state.state):
             # if it is solution stop and return the path, iterations, and time needed
             print("childrens :", length)
             # print(len(Frontier))
-            return PathToSolution(currently_state, init_state), i, time.time()-start
+            return (PathToSolution(currently_state, init_state), len(OldStates), time.time()-start)
         children = FindChildren(currently_state, OldStates)  # find the children.
         length = length + len(children)
         if Algorithm == 'BFS':
@@ -209,7 +216,6 @@ def search_heuristic(Algorithm, init_state, final_state):
                 item.getHeuristicAstar(final_state)
                 heapq.heappush(Frontier, item)
         OldStates.add(tuple(currently_state.state))
-    pass
 
 
 def findClearCubes(N, state):
