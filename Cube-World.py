@@ -18,23 +18,21 @@ class Node():
 
     def getHeuristic(self, goal_state):
         # iterating the state of current node.
+        Cubes1Move = set()
         for index, pointer in enumerate(self.state):
-            flag = False
+            list_Down_Cubes = getDownCubes(index, self.state)
             # if the current cube is on top of the right cube add 0 otherwise add 1.
-            if pointer != goal_state[index]:
-                self.h += 1
-            # if the current cube is under of the right cube add 0 otherwise add 1.
-            for i in range(len(goal_state.state)):
-                # finding the cube which the current cube must be under of.
-                # first condition is to find who is under the current cube
-                # whereas second is to find who must be under of.
-                if self.state[i] == index:
-                    if self.state[i] == goal_state.state[i]:
-                        flag = True
-            if flag:
-                pass
+            if pointer != goal_state.state[index]:
+                self.h += 2
+                Cubes1Move.add(index)
             else:
-                self.h += 1
+                for Cube in list_Down_Cubes:
+                    if self.state[Cube] != goal_state.state[Cube]:
+                        self.h += 2
+                        Cubes1Move.add(index)
+                        break
+
+
 
     def __getitem__(self, key):
         return self.state[key]
@@ -49,6 +47,15 @@ class Node():
         self.getHeuristic(goal_state)
         self.h += self.g
 
+def getDownCubes(index, state):
+    DownCubes = list()
+    temp = state[index]
+    while temp != -1:
+        DownCubes.append(state[index])
+        index = state[index]
+        temp = state[index]
+    return DownCubes
+
 
 def CheckIfSolution(current_node, goal_node):
     if current_node == goal_node:
@@ -62,7 +69,8 @@ def convertValueToKey(index):
     pass
 
 
-def convertListsToMoves(currently_state, next_state):
+def convertListsToMoves(counter, currently_state, next_state):
+    f = open("solution.txt", "a")
     i = 0
     index = -1  # index of the changing element
     while i < len(currently_state):
@@ -88,8 +96,10 @@ def convertListsToMoves(currently_state, next_state):
     else:
         tempnum = next_state[index]  # helping variable
         temp2 = convertValueToKey(tempnum)
-    print('Move(', temp, ',', temp1, ',', temp2, ')')
-
+    #print('Move(', temp, ',', temp1, ',', temp2, ')')
+    text = str(counter+1) + ".Move(" + temp + ", " + temp1 + ", " + temp2 + ")\n"
+    print(text)
+    f.write(text)
 
 def PathToSolution(node, init_state):
     tempNode = node  # currently state (solution)
@@ -109,7 +119,7 @@ def PathToSolution(node, init_state):
         if index == len(tempList) - 1:
             # if it has reached the end stop it.
             break
-        convertListsToMoves(tempList[index], tempList[index+1])
+        convertListsToMoves(index, tempList[index], tempList[index+1])
     return len(tempList) - 1
 
 
@@ -198,7 +208,6 @@ def search_heuristic(Algorithm, init_state, final_state):
         if tuple(currently_state.state) in OldStates:
             # converting the list state into tuple to have it in set.
             continue
-        #print(currently_state.state, currently_state.h)
         if CheckIfSolution(currently_state.state, final_state.state):
             # if it is solution stop and return the path, iterations, and time needed
             print("childrens :", length)
@@ -209,6 +218,7 @@ def search_heuristic(Algorithm, init_state, final_state):
         if Algorithm == 'BFS':
             for item in children:
                 item.getHeuristic(final_state)
+                #print(item.state, item.h)
                 heapq.heappush(Frontier, item)
         elif Algorithm == 'A*':
             for item in children:
@@ -294,6 +304,7 @@ if __name__ == "__main__":
     N, init_state, goal_state = process_File(sys.argv[2])
     print('init state :', init_state.state, ' goal state :', goal_state.state)
     init_state.getHeuristic(goal_state)
+    print(init_state.h)
     MovesMade, NodesTested, Time = search_heuristic(sys.argv[1], init_state, goal_state)
     print('Nodes Tested were :', NodesTested)
     print('Moves were made :', MovesMade)
