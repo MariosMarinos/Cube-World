@@ -69,8 +69,7 @@ def convertValueToKey(index):
     pass
 
 
-def convertListsToMoves(counter, currently_state, next_state):
-    f = open("solution.txt", "a")
+def convertListsToMoves(counter, currently_state, next_state, f):
     i = 0
     index = -1  # index of the changing element
     while i < len(currently_state):
@@ -96,12 +95,12 @@ def convertListsToMoves(counter, currently_state, next_state):
     else:
         tempnum = next_state[index]  # helping variable
         temp2 = convertValueToKey(tempnum)
-    #print('Move(', temp, ',', temp1, ',', temp2, ')')
     text = str(counter+1) + ".Move(" + temp + ", " + temp1 + ", " + temp2 + ")\n"
-    print(text)
+    print(str(counter+1) + ".Move(" + temp + ", " + temp1 + ", " + temp2 + ")")
     f.write(text)
 
-def PathToSolution(node, init_state):
+def PathToSolution(node, init_state, Outputname):
+    f = open(Outputname, "a")
     tempNode = node  # currently state (solution)
     Moves = list()  # empty list for saving the moves.
     while True:
@@ -119,7 +118,8 @@ def PathToSolution(node, init_state):
         if index == len(tempList) - 1:
             # if it has reached the end stop it.
             break
-        convertListsToMoves(index, tempList[index], tempList[index+1])
+        convertListsToMoves(index, tempList[index], tempList[index+1], f)
+    f.close()
     return len(tempList) - 1
 
 
@@ -160,11 +160,10 @@ def FindChildren(node, OldStates):
     return children
 
 
-def search(Algorithm, init_state, final_state):
+def search(Algorithm, init_state, final_state, Outputname):
     start = time.time()  # begging time of search algorithm
     OldStates = set()  # set for already tested nodes
     children = list()  # list with childrens filled from FindChildren
-    length = 0
     Frontier = deque()  # Frontier
     Frontier.append(init_state)  # Frontier Append the init state.
     i = 0  # How many iterations were need(Nodes tested)
@@ -178,26 +177,22 @@ def search(Algorithm, init_state, final_state):
         i += 1  # increase the iterations if the node is going to be tested.
         if CheckIfSolution(currently_state.state, final_state.state):
             # if it is solution stop and return the path, iterations, and time needed
-            print("childrens :", length)
-            print(len(Frontier))
-            return PathToSolution(currently_state, init_state), i, time.time()-start
+            return PathToSolution(currently_state, init_state,Outputname), i, time.time()-start
         children = FindChildren(currently_state, OldStates)  # find the children.
-        length = length + len(children)
-        if Algorithm == 'BFS':  # if BFS append from left in Frontier.
+        if Algorithm == 'breadth':  # if BFS append from left in Frontier.
             for item in children:
                 Frontier.appendleft(item)
-        elif Algorithm == 'DFS':  # if DFS just append in Frontier.
+        elif Algorithm == 'depth':  # if DFS just append in Frontier.
             tempchild = list((children))
             for item in tempchild:
                 Frontier.append(item)
         OldStates.add(tuple(currently_state.state))
 
 
-def search_heuristic(Algorithm, init_state, final_state):
+def search_heuristic(Algorithm, init_state, final_state,Outputname):
     start = time.time()  # begging time of search algorithm
     OldStates = set()  # set for already tested nodes
     children = list()  # list with childrens filled from FindChildren
-    length = 0
     Frontier = list()  # Frontier
     heapq.heapify(Frontier)
     heapq.heappush(Frontier, init_state)  # Frontier Append the init state.
@@ -210,17 +205,13 @@ def search_heuristic(Algorithm, init_state, final_state):
             continue
         if CheckIfSolution(currently_state.state, final_state.state):
             # if it is solution stop and return the path, iterations, and time needed
-            print("childrens :", length)
-            # print(len(Frontier))
-            return (PathToSolution(currently_state, init_state), len(OldStates), time.time()-start)
+            return (PathToSolution(currently_state, init_state, Outputname), len(OldStates), time.time()-start)
         children = FindChildren(currently_state, OldStates)  # find the children.
-        length = length + len(children)
-        if Algorithm == 'BFS':
+        if Algorithm == 'best':
             for item in children:
                 item.getHeuristic(final_state)
-                #print(item.state, item.h)
                 heapq.heappush(Frontier, item)
-        elif Algorithm == 'A*':
+        elif Algorithm == 'astar':
             for item in children:
                 item.getHeuristicAstar(final_state)
                 heapq.heappush(Frontier, item)
@@ -304,8 +295,10 @@ if __name__ == "__main__":
     N, init_state, goal_state = process_File(sys.argv[2])
     print('init state :', init_state.state, ' goal state :', goal_state.state)
     init_state.getHeuristic(goal_state)
-    print(init_state.h)
-    MovesMade, NodesTested, Time = search_heuristic(sys.argv[1], init_state, goal_state)
+    if sys.argv[1] == 'breadth' or sys.argv[1] == 'depth':
+        MovesMade, NodesTested, Time = search(sys.argv[1], init_state, goal_state,sys.argv[3])
+    elif sys.argv[1] == 'astar' or sys.argv[1] == 'best':
+        MovesMade, NodesTested, Time = search_heuristic(sys.argv[1], init_state, goal_state,sys.argv[3])
     print('Nodes Tested were :', NodesTested)
     print('Moves were made :', MovesMade)
     print('Time needed was :', Time, 'seconds.')
