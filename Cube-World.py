@@ -5,7 +5,7 @@ import time
 import itertools
 import heapq
 LETTERS = {letter: str(index) for index, letter in enumerate(ascii_uppercase, start=0)}
-PERIOD_OF_TIME = 600  # after 10 mins the program stops.
+PERIOD_OF_TIME = 60  # after 10 mins the program stops.
 
 
 class Node():
@@ -18,21 +18,19 @@ class Node():
 
     def getHeuristic(self, goal_state):
         # iterating the state of current node.
-        Cubes1Move = set()
+
         for index, pointer in enumerate(self.state):
             list_Down_Cubes = getDownCubes(index, self.state)
-            # if the current cube is on top of the right cube add 0 otherwise add 1.
+            # if the current cube is on top of the right cube dont punish otherwise add 1.
             if pointer != goal_state.state[index]:
-                self.h += 2
-                Cubes1Move.add(index)
+                self.h += 1
             else:
+                # if it has somewhere below it a cube that's not on the right
+                # place then add 2.
                 for Cube in list_Down_Cubes:
                     if self.state[Cube] != goal_state.state[Cube]:
                         self.h += 2
-                        Cubes1Move.add(index)
                         break
-
-
 
     def __getitem__(self, key):
         return self.state[key]
@@ -48,6 +46,7 @@ class Node():
         self.h += self.g
 
 def getDownCubes(index, state):
+ #function finds the cubes below of the index cube we want.
     DownCubes = list()
     temp = state[index]
     while temp != -1:
@@ -96,7 +95,6 @@ def convertListsToMoves(counter, currently_state, next_state, f):
         tempnum = next_state[index]  # helping variable
         temp2 = convertValueToKey(tempnum)
     text = str(counter+1) + ".Move(" + temp + ", " + temp1 + ", " + temp2 + ")\n"
-    print(str(counter+1) + ".Move(" + temp + ", " + temp1 + ", " + temp2 + ")")
     f.write(text)
 
 def PathToSolution(node, init_state, Outputname):
@@ -200,9 +198,9 @@ def search_heuristic(Algorithm, init_state, final_state,Outputname):
         if (time.time() > start + PERIOD_OF_TIME):
             return 0, 0, 0  # if the given time expires stop the program.
         currently_state = heapq.heappop(Frontier)  # popping currently state on heap.
-        if tuple(currently_state.state) in OldStates:
-            # converting the list state into tuple to have it in set.
-            continue
+        if Algorithm == 'best':
+            if tuple(currently_state.state) in OldStates:
+                continue
         if CheckIfSolution(currently_state.state, final_state.state):
             # if it is solution stop and return the path, iterations, and time needed
             return (PathToSolution(currently_state, init_state, Outputname), len(OldStates), time.time()-start)
